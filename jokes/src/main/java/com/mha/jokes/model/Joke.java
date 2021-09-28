@@ -1,6 +1,9 @@
 package com.mha.jokes.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.mha.jokes.model.enumerated.Category;
+import com.mha.jokes.model.enumerated.JokeType;
+import com.mha.jokes.model.enumerated.Language;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

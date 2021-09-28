@@ -1,4 +1,4 @@
-package com.mha.jokes.model;
+package com.mha.jokes.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
