@@ -1,5 +1,13 @@
 package com.mha.jokes.model.dto;
 
+/**
+ * data transfer object to message
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;

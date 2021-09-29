@@ -1,5 +1,13 @@
 package com.mha.jokes.service;
 
+/**
+ * unit test JokeService
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +51,7 @@ public class JokesServiceTest {
 		jokesService.addToJoke(_joke);
 		jokesService.updateJokeRated(_joke);
 
-		assertEquals(jokesService.getJokeById(Optional.of(1)).get().getValue(), true);
+		assertEquals(jokesService.getJokeById(1).get().getValue(), true);
 	}
 	
 	@Test
@@ -55,25 +63,7 @@ public class JokesServiceTest {
 		assertEquals(jokesService.getCategoryAvgByCategory(Category.Christmas).get().getAvg(), 9);
 	}
 	
-	@Test
-	public void shouldHaveOnlyUnrated_getUnratedJoke() {
-		
-		Joke _joke1 = new Joke(1, true, Language.en, Category.Christmas, JokeType.single,
-				"Papai Noel tem o saco de brinquedo", null, null, new Flags(), false);
-		
-		Joke _joke2 = new Joke(1, true, Language.en, Category.Christmas, JokeType.single,
-				"Papai Noel trabalha so uma vez por ano", null, null, new Flags(), true);
 
-		JokeDTO expected = new JokeDTO(1, "Papai Noel tem o saco de brinquedo");
-		
-		jokesService.addToJoke(_joke1);
-		jokesService.addToJoke(_joke2);
-		
-		JokeDTO in = (JokeDTO) jokesService.getUnratedJokes().findFirst().get();
-		
-		assertThat(in).usingRecursiveComparison().isEqualTo(expected);
-
-	}
 	
 	@Test
 	public void shouldRegisterRate_registerRate() {

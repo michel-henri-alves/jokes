@@ -1,5 +1,15 @@
 package com.mha.jokes.controller;
 
+import java.util.List;
+
+/**
+ * Provide endpoints with API information
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import java.util.Optional;
 
 import org.apache.commons.lang3.EnumUtils;
@@ -13,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mha.jokes.model.dto.CategoryDTO;
 import com.mha.jokes.model.dto.JokeDTO;
 import com.mha.jokes.model.dto.Message;
 import com.mha.jokes.model.enumerated.Category;
@@ -26,14 +37,25 @@ public class JokesController {
 	@Autowired
 	JokesService jokesService;
 
+	
+	/**
+     * return a joke from any category
+     * @return Optional<JokeDTO> 
+     */
 	@GetMapping("/joke")
 	public ResponseEntity<?> getAnyJoke() {
 
-		Optional<JokeDTO> response = Optional.ofNullable(jokesService.getAnyJoke());
+		Optional<JokeDTO> response = jokesService.getAnyJoke();
 		return response.isPresent() ? new ResponseEntity<>(response, HttpStatus.OK)
 				: new ResponseEntity<>(new Message("You're out of jokes"), HttpStatus.OK);
 	}
 
+	/**
+     * return a joke filtered by category
+     * 
+     * @param Optional<String> - filtered by category
+     * @return Optional<JokeDTO> 
+     */
 	@GetMapping("/joke/{category}")
 	public ResponseEntity<?> getCategorizedJoke(@PathVariable("category") Optional<String> category) {
 
@@ -41,7 +63,7 @@ public class JokesController {
 
 		if (EnumUtils.isValidEnum(Category.class, category.get())) {
 
-			Optional<JokeDTO> dto = Optional.ofNullable(jokesService.getCategorizedJoke(category));
+			Optional<JokeDTO> dto = jokesService.getCategorizedJoke(category);
 			response = dto.isPresent() ? new ResponseEntity<>(jokesService.getCategorizedJoke(category), HttpStatus.OK)
 					: new ResponseEntity<>(new Message("You're out of jokes"), HttpStatus.OK);
 
@@ -55,20 +77,31 @@ public class JokesController {
 
 	}
 
+	
+	/**
+     * received rate from users
+     * 
+     * @param Optional<Integer> joke id
+     * @param Optional<Integer> grade to register (0-10)
+     * @return ResponseEntity<?> 
+     */
 	@PostMapping("/rate/{id}/{grade}")
 	public ResponseEntity<?> registerRate(@PathVariable Optional<Integer> id, @PathVariable Optional<Integer> grade) {
 
 		ResponseEntity<?> response = null;
 
+		//ensure grade inside range (0 to 10)
 		if (grade.get() < 0 || grade.get() > 10) {
 			response = new ResponseEntity<>(new Message("This grade is not possible:\n Vote valid: 1 to 10"),
 					HttpStatus.BAD_REQUEST);
 		}
 
-		else if (jokesService.getJokeById(id).isEmpty()) {
+		//ensures that id belongs to a consumed register 
+		else if (jokesService.getJokeById(id.get()).isEmpty()) {
 			response = new ResponseEntity<>(new Message("This joke is not presents"), HttpStatus.BAD_REQUEST);
 		}
 
+		//register rate
 		else {
 			jokesService.registerRate(id, grade);
 			response = new ResponseEntity<>(new Message("Joke " + id.get() + " was rated"), HttpStatus.OK);
@@ -77,12 +110,23 @@ public class JokesController {
 		return response;
 	}
 
+	/**
+     * list all categories sorted by rate average
+     * 
+     * @return ResponseEntity<?> 
+     */
 	@GetMapping("/categories")
-	public ResponseEntity<?> categoriesList() {
+	public ResponseEntity<List<CategoryDTO>> categoriesList() {
 
 		return new ResponseEntity<>(jokesService.categoriesList(), HttpStatus.OK);
 	}
 
+	
+	/**
+     * list all jokes stored and not rated yet
+     * 
+     * @return ResponseEntity<?> 
+     */
 	@GetMapping("/unrated")
 	public ResponseEntity<?> getUnrated() {
 

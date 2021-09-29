@@ -1,5 +1,13 @@
 package com.mha.jokes.controller;
 
+/**
+ * Consuming by JokeAPI (https://v2.jokeapi.dev/) in safe-mode
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -11,52 +19,42 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 
 import com.mha.jokes.model.Joke;
-import com.mha.jokes.model.dto.JokeDTO;
-import com.mha.jokes.service.JokesService;
-import com.mha.jokes.util.ConvertEntityToDTO;
 
 @Controller
 public class JokeAPIController {
 
 	@Autowired
 	private RestTemplate template;
-	@Autowired
-	ConvertEntityToDTO entityToDTO;
-	@Autowired
-	JokesService jokesService;
 
 	private static final Logger log = LoggerFactory.getLogger(JokesController.class);
 	private static String CONSUMING_URL = "https://v2.jokeapi.dev/joke/";
 
-	public JokeDTO consumingJoke(String category) {
+	/**
+     * consuming a joke
+     * 
+     * @param category filter by category
+     * @return Optional<Joke> 
+     */
+	public Optional<Joke> consumingJoke(String category) {
 
-		Joke joke;
-		int counter = 0;
+		Optional<Joke> response = Optional.ofNullable(null);
+		
+		try {
+			response = Optional.ofNullable(this.template.getForObject(CONSUMING_URL + category + "?safe-mode", Joke.class));
 
-		do {
+		} catch (Exception e) {
+			log.error("Falha ao recuperar dados do API: "+e.getMessage());
 
-			counter++;
-			try {
-			
-				joke = this.template.getForObject(CONSUMING_URL + category + "?safe-mode", Joke.class);
-	
-			} catch (Exception e) {
-				joke = null;
-				log.error(e.getMessage());
-			}
-
-		} while (jokesService.getJokeById(Optional.ofNullable(joke.getId())).isPresent() && counter < 100);
-
-		if (counter == 100) {
-			joke = null;
-		} else {
-			jokesService.addToJoke(joke);
 		}
-
-		return entityToDTO.mappingObjects(joke, JokeDTO.class);
+		return response;
 
 	}
 
+	/**
+     * 
+     * bean to build RestTemplate
+     *
+     */
 	@Bean
 	private RestTemplate template(RestTemplateBuilder builder) {
 		return builder.build();

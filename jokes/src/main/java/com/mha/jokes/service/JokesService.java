@@ -1,5 +1,13 @@
 package com.mha.jokes.service;
 
+/**
+ * business logic over informations to make available in REST services
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,18 +17,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mha.jokes.controller.JokeAPIController;
-import com.mha.jokes.controller.JokesController;
 import com.mha.jokes.model.CategoryAvg;
 import com.mha.jokes.model.Joke;
 import com.mha.jokes.model.dto.CategoryDTO;
 import com.mha.jokes.model.dto.JokeDTO;
-//import com.mha.jokes.model.enumerated.Category;
 import com.mha.jokes.model.enumerated.Category;
 
 import lombok.Getter;
@@ -29,17 +32,17 @@ import lombok.Getter;
 public class JokesService {
 
 	@Autowired
-	JokeAPIController jokeAPIController;
+	JokesAPIService jokesAPIService;
 
-	// triplet values 1st- numbers of rates, 2nd- last sum 3rd- last avg
+	
 	@Getter
 	private List<CategoryAvg> categories = new ArrayList<>();
 	@Getter
 	private HashMap<Joke, Boolean> jokes = new HashMap<>(); // boolean param = joke rated
-	private static final Logger log = LoggerFactory.getLogger(JokesController.class);
 
 	JokesService() {
 
+		//populate array w/ initial parameters
 		categories.add(new CategoryAvg(Category.Christmas, 0, 0, 0));
 		categories.add(new CategoryAvg(Category.Dark, 0, 0, 0));
 		categories.add(new CategoryAvg(Category.Misc, 0, 0, 0));
@@ -49,38 +52,65 @@ public class JokesService {
 
 	}
 
-	public JokeDTO getAnyJoke() {
+	/**
+     * 
+     * category by any category
+     * 
+     * @return Optional<JokeDTO> 
+     */
+	public Optional<JokeDTO> getAnyJoke() {
 
-		return jokeAPIController.consumingJoke("/Any");
+		return jokesAPIService.consumingJoke("/Any");
 	}
 
-	public JokeDTO getCategorizedJoke(Optional<String> category) {
+	/**
+     * joke by category
+     * 
+     * @param Optional<String> category to filter
+     * @return Optional<JokeDTO> 
+     */
+	public Optional<JokeDTO> getCategorizedJoke(Optional<String> category) {
 
-		return jokeAPIController.consumingJoke(category.get());
+		return jokesAPIService.consumingJoke(category.get());
 	}
 
+	
+	/**
+     * received rate from users
+     * 
+     * @param Optional<Integer> joke id
+     * @param Optional<Integer> grade to register (0-10)
+     * @return ResponseEntity<?> 
+     */
 	public void registerRate(Optional<Integer> id, Optional<Integer> grade) {
 
-		Optional<Entry<Joke, Boolean>> jokeAndParameters = getJokeById(id);
+		//retrieve joke registered by id
+		Optional<Entry<Joke, Boolean>> jokeAndParameters = getJokeById(id.get());
 
+		//retrieve category by description
 		Optional<CategoryAvg> categoryAvg = getCategoryAvgByCategory(
 				jokeAndParameters.get().getKey().getCategory());
 
+		//perform calculations to obtain the average
 		Joke joke = jokeAndParameters.get().getKey();
 		int nrOfRates = categoryAvg.get().getNrOfRates() + 1;
 		int lastTotal = categoryAvg.get().getTotal() + grade.get();
 		int lastAvg = lastTotal / nrOfRates;
 
+		//update new infos in list
 		updateCategoriesParameters(joke.getCategory(), nrOfRates, lastTotal, lastAvg);
-
+		
+		//update joke register to rated
 		if (!jokeAndParameters.get().getValue())
 			updateJokeRated(joke);
 
 	}
 
-	/*
-	 * 
-	 */
+	/**
+     * list of categories sorted by rate avg
+     * 
+     * @return List<CategoryDTO>
+     */
 	public List<CategoryDTO> categoriesList() {
 
 		return this.getCategories().parallelStream().sorted(Comparator.comparingInt(CategoryAvg::getAvg).reversed())
@@ -89,9 +119,11 @@ public class JokesService {
 
 		}
 
-	/*
-	 * 
-	 */
+	/**
+     * list jokes register without rate
+     * 
+     * @return Stream<Object>
+     */
 	public Stream<Object> getUnratedJokes() {
 
 		return this.getJokes().entrySet().parallelStream().filter(element -> element.getValue() == false)
@@ -99,14 +131,25 @@ public class JokesService {
 
 	}
 
-	public Optional<Entry<Joke, Boolean>> getJokeById(Optional<Integer> id) {
+	/**
+     * return joke register by id
+     * 
+     * @param int id
+     * @return Optional<Entry<Joke, Boolean>>
+     */
+	public Optional<Entry<Joke, Boolean>> getJokeById(int id) {
 
-		return this.getJokes().entrySet().parallelStream().filter(element -> id.get() == element.getKey().getId())
+		return this.getJokes().entrySet().parallelStream().filter(element -> id == element.getKey().getId())
 				.findFirst();
 
 	}
 
-
+	/**
+     * return category register by description
+     * 
+     * @param Category
+     * @return Optional<CategoryAvg>
+     */
 	public Optional<CategoryAvg> getCategoryAvgByCategory(Category category) {
 
 		return this.getCategories().parallelStream().filter(element -> element.getDescription().equals(category))
@@ -114,18 +157,27 @@ public class JokesService {
 
 	}
 
-	/*
-	 * 
-	 */
+	/**
+     * update avg values of category register
+     * 
+     * @param Category
+     * @param int - qty of rates realized
+     * @param int - last total sum of votes
+     * @param int - last avg
+     * @return
+     */
 	public void updateCategoriesParameters(Category category, int nrOfRates, int total, int avg) {
 
 		this.categories.stream().filter(e -> e.getDescription().equals(category))
 				.forEach(e -> e.setParams(nrOfRates, total, avg));
 	}
 
-	/*
-	 * 
-	 */
+	/**
+     * update joke register to rated (true)
+     * 
+     * @param Joke
+     * @return
+     */
 	public void updateJokeRated(Joke joke) {
 
 		this.jokes.entrySet().stream().filter(element -> element.getKey().getId() == joke.getId())
@@ -133,9 +185,12 @@ public class JokesService {
 
 	}
 
-	/*
-	 * 
-	 */
+	/**
+     * add a new joke register
+     * 
+     * @param Joke
+     * @return
+     */
 	public void addToJoke(Joke joke) {
 		this.jokes.put(joke, false);
 	}

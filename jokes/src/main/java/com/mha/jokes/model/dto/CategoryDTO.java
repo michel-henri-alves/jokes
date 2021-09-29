@@ -1,5 +1,14 @@
 package com.mha.jokes.model.dto;
 
+
+/**
+ * data transfer object to category
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import com.mha.jokes.model.enumerated.Category;
 
 import lombok.AllArgsConstructor;

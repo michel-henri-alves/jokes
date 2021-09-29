@@ -1,5 +1,13 @@
 package com.mha.jokes.model;
 
+/**
+ * flags params
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;

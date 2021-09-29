@@ -1,5 +1,14 @@
 package com.mha.jokes.model;
 
+/**
+ * pure joke object from API
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mha.jokes.model.enumerated.Category;
 import com.mha.jokes.model.enumerated.JokeType;
@@ -47,6 +56,11 @@ public class Joke {
 	@Setter
 	private boolean error;	
 	
+	/**
+     * case joke-object is single-type set value only using joke and case twopart concatenate setup+delivery
+     * 
+     * @return String 
+     */
 	public String getJoke() {
 		return this.type == JokeType.single ? this.joke : "- "+this.setup +"\n - "+this.delivery; 
 	}

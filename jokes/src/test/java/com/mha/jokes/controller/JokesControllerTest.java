@@ -1,5 +1,13 @@
 package com.mha.jokes.controller;
 
+/**
+ * unit test JokeController
+ * 
+ * @author michel
+ * @version 0.0.1
+ * 
+ */
+
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -45,7 +53,7 @@ public class JokesControllerTest {
 	@Test
 	public void shouldReturnOK_getAnyJoke() {
 
-		JokeDTO dto = new JokeDTO(1, "Papai noel tem o saco de brinquedo!");
+		Optional<JokeDTO> dto = Optional.of(new JokeDTO(1, "Papai noel tem o saco de brinquedo!"));
 		
 		// mock da classe service
 		when(this.jokesService.getAnyJoke())
@@ -56,26 +64,14 @@ public class JokesControllerTest {
 		        .body(is(equalTo("{\"id\":1,\"joke\":\"Papai noel tem o saco de brinquedo!\"}")));
 	}
 	
-	
-	@Test
-	public void shouldReturnEmpty_getAnyJoke() {
 
-		// mock da classe service
-		when(this.jokesService.getAnyJoke())
-				.thenReturn(null);
-
-		given().accept(ContentType.JSON).when().get("/service/joke").then()
-				.statusCode(HttpStatus.OK.value())
-		        .body(is(equalTo("{\"message\":\"You're out of jokes\"}")));
-	}
-	
 
 	@Test
 	public void shouldReturnOK_WhenGetCategorizedJoke() {
 
 		// mock da classe service
 		when(this.jokesService.getCategorizedJoke(Optional.of(Category.Christmas.name())))
-				.thenReturn(new JokeDTO(1, "Papai noel tem o saco de brinquedo!"));
+				.thenReturn(Optional.of(new JokeDTO(1, "Papai noel tem o saco de brinquedo!")));
 
 		given().accept(ContentType.JSON).when().get("/service/joke/{category}", Category.Christmas.name()).then()
 				.statusCode(HttpStatus.OK.value());
@@ -104,7 +100,7 @@ public class JokesControllerTest {
 	@Test
 	public void shouldReturnOK_WhenPostRegisterRate() {
 
-		when(this.jokesService.getJokeById(Optional.of(1)))
+		when(this.jokesService.getJokeById(1))
 				.thenReturn(Optional.of(new AbstractMap.SimpleEntry<>(new Joke(), false)));
 
 		given().accept(ContentType.JSON).when().post("/service/rate/{id}/{grade}", 1, 10).then()
@@ -131,7 +127,7 @@ public class JokesControllerTest {
 	@Test
 	public void shouldReturnBADREQUEST_WhenPostRegisterRateWithJokeNotRegistered() {
 
-		when(this.jokesService.getJokeById(Optional.of(1))).thenReturn(Optional.empty());
+		when(this.jokesService.getJokeById(1)).thenReturn(Optional.empty());
 
 		given().accept(ContentType.JSON).when().post("/service/rate/{id}/{grade}", 1, 10).then()
 				.statusCode(HttpStatus.BAD_REQUEST.value());
