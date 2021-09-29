@@ -14,6 +14,7 @@ import com.mha.jokes.model.enumerated.Category;
 import com.mha.jokes.model.enumerated.JokeType;
 import com.mha.jokes.model.enumerated.Language;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,7 @@ import lombok.ToString;
 @ToString
 public class Joke {
 	
+	@ApiModelProperty(notes = "Joke ID")
 	@Getter 
 	@Setter
 	private int id;
@@ -35,6 +37,7 @@ public class Joke {
 	@Getter 
 	@Setter
 	private Language lang;
+	@ApiModelProperty(notes = "Joke category")
 	@Getter
 	@Setter
 	private Category category;
@@ -61,6 +64,7 @@ public class Joke {
      * 
      * @return String 
      */
+	@ApiModelProperty(notes = "A Joke")
 	public String getJoke() {
 		return this.type == JokeType.single ? this.joke : "- "+this.setup +"\n - "+this.delivery; 
 	}

@@ -29,9 +29,13 @@ import com.mha.jokes.model.dto.Message;
 import com.mha.jokes.model.enumerated.Category;
 import com.mha.jokes.service.JokesService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @CrossOrigin(origins = { "http://localhost:4200", "http://localhost:8080" })
 @RestController
 @RequestMapping("/service")
+@Api(tags = "Jokes")
 public class JokesController {
 
 	@Autowired
@@ -43,6 +47,7 @@ public class JokesController {
      * @return Optional<JokeDTO> 
      */
 	@GetMapping("/joke")
+	@ApiOperation(value = "take a joke")
 	public ResponseEntity<?> getAnyJoke() {
 
 		Optional<JokeDTO> response = jokesService.getAnyJoke();
@@ -57,6 +62,7 @@ public class JokesController {
      * @return Optional<JokeDTO> 
      */
 	@GetMapping("/joke/{category}")
+	@ApiOperation(value = "take a joke by category")
 	public ResponseEntity<?> getCategorizedJoke(@PathVariable("category") Optional<String> category) {
 
 		ResponseEntity<?> response = null;
@@ -86,6 +92,7 @@ public class JokesController {
      * @return ResponseEntity<?> 
      */
 	@PostMapping("/rate/{id}/{grade}")
+	@ApiOperation(value = "rate a joke. Please grades from 0 to 10 ")
 	public ResponseEntity<?> registerRate(@PathVariable Optional<Integer> id, @PathVariable Optional<Integer> grade) {
 
 		ResponseEntity<?> response = null;
@@ -116,6 +123,7 @@ public class JokesController {
      * @return ResponseEntity<?> 
      */
 	@GetMapping("/categories")
+	@ApiOperation(value = "category list sorted by average")
 	public ResponseEntity<List<CategoryDTO>> categoriesList() {
 
 		return new ResponseEntity<>(jokesService.categoriesList(), HttpStatus.OK);
@@ -128,6 +136,7 @@ public class JokesController {
      * @return ResponseEntity<?> 
      */
 	@GetMapping("/unrated")
+	@ApiOperation(value = "joke unrated list")
 	public ResponseEntity<?> getUnrated() {
 
 		return new ResponseEntity<>(jokesService.getUnratedJokes(), HttpStatus.OK);

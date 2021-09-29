@@ -1,5 +1,7 @@
 package com.mha.jokes.model.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * data transfer object to joke
  * 
@@ -18,9 +20,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class JokeDTO {
 	
+    @ApiModelProperty(notes = "Joke ID")
 	@Getter
 	@Setter
 	private int id;
+    @ApiModelProperty(notes = "A joke")
 	@Getter
 	@Setter
 	private String joke;
